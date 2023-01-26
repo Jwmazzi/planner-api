@@ -30,5 +30,25 @@ router.get('/campaigns/:campaignId', async (req, res, next) => {
 
 });
 
+router.get('/campaigns/:campaignId/games', async (req, res, next) => {
+
+  let games = await db.query(db.sql.campaignGames, [req.params.campaignId]);
+
+  res.send({
+    "games": games.rows,
+  });
+
+});
+
+router.get('/layouts/:gameId', async (req, res, next) => {
+
+  let layouts = await db.query(db.sql.gameLayout, [req.params.gameId]);
+
+  res.send({
+    "layouts": layouts.rows
+  });
+
+});
+
 
 module.exports = router;
