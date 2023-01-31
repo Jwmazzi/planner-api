@@ -39,24 +39,54 @@ class Planner {
 
     }
 
-    loadGames = (games) => {
+    buildGameTable(games) {
+
+        const targetTable = document.querySelector("#gameOverviewBody");
+
+        while (targetTable.lastElementChild) {
+            targetTable.removeChild(targetTable.lastElementChild);
+        }
 
         games.forEach((game) => {
+            var date    = new Date(game.gamedate);
+            var dateViz = date.toLocaleDateString('en-us', { year:"numeric", month:"short"})
+    
+            var row = targetTable.insertRow(0);
+            var cell_a = row.insertCell(0);
+            cell_a.innerHTML = game.name;
+            var cell_b = row.insertCell(1);
+            cell_b.innerHTML = game.description;
+            var cell_c = row.insertCell(2);
+            cell_c.innerHTML = dateViz;
+        });
+
+    }
+
+    loadGames = (games) => {
+
+        this.buildGameTable(games);
+
+        games.forEach((game) => {
+            
+            var date    = new Date(game.gamedate);
+            var dateViz = date.toLocaleDateString('en-us', { year:"numeric", month:"short"});
 
             var geoJsonGroup = L.geoJSON(JSON.parse(game.geojson), {
 
                 onEachFeature: function(feature, layer) {
+
                     layer.tag = "gameLocation";
                     layer.bindPopup(
                         `<h6>${game.name}</h6>
-                         <p>${game.description}</p>
+                         <p>Description: ${game.description}</p>
+                         <p>Date: ${dateViz}</p>
                         `
                     )
                 },
 
                 pointToLayer: function(feature, latlng) {
                     var icon = L.icon({
-                        iconUrl: "http://localhost:3000/images/planet.jpg",
+                        iconUrl: `http://localhost:3000/images/${game.image}`,
                         iconSize:     [50, 50], 
                         iconAnchor:   [25, 25], 
                         popupAnchor:  [0, 0]
@@ -108,9 +138,9 @@ class Planner {
 
         this.clearLayoutMap();
 
-        let results = await (await fetch(`http://localhost:3000/planner/layouts/${e.target.gameId}`)).json();
+        let layoutResults = await (await fetch(`http://localhost:3000/planner/layouts/${e.target.gameId}`)).json();
 
-        results.layouts.forEach((layout) => {
+        layoutResults.layouts.forEach((layout) => {
             L.geoJSON(JSON.parse(layout.geojson), {
                 onEachFeature: function(feature, layer) {
                     layer.tag = "layoutObject"
@@ -128,8 +158,6 @@ class Planner {
             crs: L.CRS.Simple,
             minZoom: -10,
         });
-    
-        // L.imageOverlay('http://localhost:3000/images/grid_a.png', bounds).addTo(this.layoutMap);
     
         this.layoutMap.fitBounds(bounds);
 

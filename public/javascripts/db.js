@@ -30,7 +30,7 @@ module.exports = {
         from games
         left join locations on games.location_id = locations.id
         where campaign_id = $1
-        
+        order by gamedate desc
         `,
         
         gameLayout: `

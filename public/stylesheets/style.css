@@ -4,6 +4,9 @@
 .mapRow {
   height: 400px;
 }
+.tableRow {
+  margin-top: 50px;
+}
 .leaflet-container {
   margin-top: 35px;
   border: 1px solid black;
