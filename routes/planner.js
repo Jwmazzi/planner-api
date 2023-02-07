@@ -21,11 +21,13 @@ router.get('/campaigns', async (req, res, next) => {
 router.get('/campaigns/:campaignId', async (req, res, next) => {
 
   let campaign = await db.query(db.sql.campaign, [req.params.campaignId]);
-  let players = await db.query(db.sql.campaignPlayers, [req.params.campaignId]);
+  let players  = await db.query(db.sql.campaignPlayers, [req.params.campaignId]);
+  let winners  = await db.query(db.sql.campaignWinners, [req.params.campaignId]);
 
   res.send({
     "campaignInfo": campaign.rows,
-    "players": players.rows
+    "players": players.rows,
+    "winners": winners.rows
   });
 
 });

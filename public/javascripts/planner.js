@@ -37,6 +37,8 @@ class Planner {
         let gameResults = await (await fetch(`http://localhost:3000/planner/campaigns/${option.dataset.campaignid}/games`)).json();
         this.loadGames(gameResults.games);
 
+        this.buildWinnerTable(campaignResults.winners);
+
     }
 
     buildGameTable(games) {
@@ -60,6 +62,24 @@ class Planner {
             cell_c.innerHTML = dateViz;
         });
 
+    }
+
+    buildWinnerTable(winners) {
+
+        const targetTable = document.querySelector("#winnerOverviewBody");
+
+        while (targetTable.lastElementChild) {
+            targetTable.removeChild(targetTable.lastElementChild);
+        }
+
+        winners.forEach((winner) => {
+            var row = targetTable.insertRow(0);
+            var cell_a = row.insertCell(0);
+            cell_a.innerHTML = winner.name;
+            var cell_b = row.insertCell(1);
+            cell_b.innerHTML = winner.wins;
+
+        });
     }
 
     loadGames = (games) => {
@@ -96,7 +116,13 @@ class Planner {
                 }
             });
 
-            geoJsonGroup.gameId = game.id; 
+            console.log(game)
+
+            geoJsonGroup.gameId     = game.game_id;
+            geoJsonGroup.locationId = game.location_id;
+            geoJsonGroup.xBounds    = game.x_bounds;
+            geoJsonGroup.yBounds    = game.y_bounds;
+
             geoJsonGroup.addTo(this.locationMap);
             geoJsonGroup.on("click", this.locationMarkerClicked);
         });
@@ -136,12 +162,21 @@ class Planner {
 
     locationMarkerClicked = async (e) => {
 
+        console.log(e.target)
+
         this.clearLayoutMap();
 
-        let layoutResults = await (await fetch(`http://localhost:3000/planner/layouts/${e.target.gameId}`)).json();
+        this.layoutMap.fitBounds([e.target.xBounds, e.target.yBounds]);
+
+        let layoutResults = await (await fetch(`http://localhost:3000/planner/layouts/${e.target.locationId}`)).json();
 
         layoutResults.layouts.forEach((layout) => {
             L.geoJSON(JSON.parse(layout.geojson), {
+                style: {
+                    "color": "black",
+                    "weight": 1,
+                    "opacity": 0.65
+                },
                 onEachFeature: function(feature, layer) {
                     layer.tag = "layoutObject"
                 }
@@ -151,15 +186,12 @@ class Planner {
     }
 
     initLayoutMap = () => {
-        var bounds = [[0,0], [1000, 1000]];
     
         this.layoutMap = L.map('layoutMap', {
             attributionControl: false,
             crs: L.CRS.Simple,
-            minZoom: -10,
+            minZoom: -10
         });
-    
-        this.layoutMap.fitBounds(bounds);
 
         var drawControl = new L.Control.Draw({
             edit: {

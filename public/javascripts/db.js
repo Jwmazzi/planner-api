@@ -25,12 +25,25 @@ module.exports = {
         where campaignparticipants.campaign_id = $1
         `,
 
+        campaignWinners: `
+        select winner_id, players.name, count(*) as wins
+        from games
+        left join players on players.id = games.winner_id
+        where games.campaign_id = $1
+        group by winner_id, players.name
+        `,
+
         campaignGames: `
-        select *, st_asgeojson(geom) as geojson
+        select *, locations.id as layout_id, games.id as game_id, st_asgeojson(geom) as geojson
         from games
         left join locations on games.location_id = locations.id
         where campaign_id = $1
         order by gamedate desc
+        `,
+
+        game: `
+        select * from games
+        where id = $1
         `,
         
         gameLayout: `
