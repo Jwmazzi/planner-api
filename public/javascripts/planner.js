@@ -162,8 +162,6 @@ class Planner {
 
     locationMarkerClicked = async (e) => {
 
-        console.log(e.target)
-
         this.clearLayoutMap();
 
         this.layoutMap.fitBounds([e.target.xBounds, e.target.yBounds]);
